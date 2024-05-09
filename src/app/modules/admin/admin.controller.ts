@@ -3,7 +3,7 @@ import { adminServices } from "./admin.service";
 
 const getAllAdmin = async (req: Request, res: Response) => {
   try {
-    const result = await adminServices.getAllAdmin();
+    const result = await adminServices.getAllAdmin(req.query);
     res.status(200).json({
       success: true,
       statusCode: 201,
