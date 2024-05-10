@@ -1,4 +1,4 @@
-import { Admin, Prisma } from "@prisma/client";
+import { Admin, Prisma, UserStatus } from "@prisma/client";
 import calculatePagination from "../../../helpers/paginationHelpers";
 import prisma from "../../../shared/prisma";
 import { adminSearchAbleFields } from "./admin.constant";
@@ -26,6 +26,9 @@ const getAllAdmin = async (params: any, options: any) => {
       })),
     });
   }
+  andConditions.push({
+    isDeleted: false,
+  });
   const whereConditions: Prisma.AdminWhereInput = { AND: andConditions };
   const result = await prisma.admin.findMany({
     where: whereConditions,
@@ -53,18 +56,20 @@ const getAllAdmin = async (params: any, options: any) => {
   };
 };
 
-const getSingleAdmin = async (id: string) => {
+const getSingleAdmin = async (id: string): Promise<Admin | null> => {
   const result = await prisma.admin.findFirstOrThrow({
     where: {
       id,
+      isDeleted: false,
     },
   });
   return result;
 };
-const updateAdmin = async (id: string, payload: Partial<Admin>) => {
+const updateAdmin = async (id: string, payload: Partial<Admin>): Promise<Admin | null> => {
   await prisma.admin.findUniqueOrThrow({
     where: {
       id,
+      isDeleted: false,
     },
   });
   const result = await prisma.admin.update({
@@ -75,10 +80,11 @@ const updateAdmin = async (id: string, payload: Partial<Admin>) => {
   });
   return result;
 };
-const deleteAdmin = async (id: string) => {
+const deleteAdmin = async (id: string): Promise<Admin | null> => {
   await prisma.admin.findUniqueOrThrow({
     where: {
       id,
+      isDeleted: false,
     },
   });
   const result = await prisma.$transaction(async (tx) => {
@@ -96,9 +102,38 @@ const deleteAdmin = async (id: string) => {
   });
   return result;
 };
+const softDeleteAdmin = async (id: string): Promise<Admin | null> => {
+  await prisma.admin.findUniqueOrThrow({
+    where: {
+      id,
+      isDeleted: false,
+    },
+  });
+  const result = await prisma.$transaction(async (tx) => {
+    const deleteAdmin = await tx.admin.update({
+      where: {
+        id,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+    await tx.user.update({
+      where: {
+        email: deleteAdmin.email,
+      },
+      data: {
+        status: UserStatus.DELETED,
+      },
+    });
+    return deleteAdmin;
+  });
+  return result;
+};
 export const adminServices = {
   getAllAdmin,
   getSingleAdmin,
   updateAdmin,
   deleteAdmin,
+  softDeleteAdmin,
 };

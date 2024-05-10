@@ -80,9 +80,28 @@ const deleteAdmin = async (req: Request, res: Response) => {
     });
   }
 };
+const softDeleteAdmin = async (req: Request, res: Response) => {
+  try {
+    const result = await adminServices.softDeleteAdmin(req.params.adminId);
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "admin deleted successfully",
+
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went Wrong",
+      error: error,
+    });
+  }
+};
 export const adminController = {
   getAllAdmin,
   getSingleAdmin,
   updateAdmin,
   deleteAdmin,
+  softDeleteAdmin,
 };
