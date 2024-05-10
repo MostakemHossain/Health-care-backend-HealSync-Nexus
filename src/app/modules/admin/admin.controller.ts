@@ -49,8 +49,26 @@ const updateAdmin = async (req: Request, res: Response) => {
     );
     res.status(200).json({
       success: true,
-      statusCode: 201,
+      statusCode: 200,
       message: "update admin successfully",
+
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went Wrong",
+      error: error,
+    });
+  }
+};
+const deleteAdmin = async (req: Request, res: Response) => {
+  try {
+    const result = await adminServices.deleteAdmin(req.params.adminId);
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "admin deleted successfully",
 
       data: result,
     });
@@ -66,4 +84,5 @@ export const adminController = {
   getAllAdmin,
   getSingleAdmin,
   updateAdmin,
+  deleteAdmin,
 };
