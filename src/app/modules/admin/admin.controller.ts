@@ -1,9 +1,16 @@
 import { Request, Response } from "express";
+import pick from "../../../shared/pick";
 import { adminServices } from "./admin.service";
 
 const getAllAdmin = async (req: Request, res: Response) => {
   try {
-    const result = await adminServices.getAllAdmin(req.query);
+    const filters = pick(req.query, [
+      "email",
+      "name",
+      "searchTerm",
+      "contactNumber",
+    ]);
+    const result = await adminServices.getAllAdmin(filters);
     res.status(200).json({
       success: true,
       statusCode: 201,
