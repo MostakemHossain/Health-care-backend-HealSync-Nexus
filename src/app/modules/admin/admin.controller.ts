@@ -12,6 +12,25 @@ const getAllAdmin = async (req: Request, res: Response) => {
       success: true,
       statusCode: 201,
       message: "get All Admin retrieved successfully",
+      meta: result.meta,
+      data: result.data,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went Wrong",
+      error: error,
+    });
+  }
+};
+const getSingleAdmin = async (req: Request, res: Response) => {
+  try {
+    const result = await adminServices.getSingleAdmin(req.params.adminId);
+    res.status(200).json({
+      success: true,
+      statusCode: 201,
+      message: "get Single Admin retrieved successfully",
+
       data: result,
     });
   } catch (error: any) {
@@ -24,4 +43,5 @@ const getAllAdmin = async (req: Request, res: Response) => {
 };
 export const adminController = {
   getAllAdmin,
+  getSingleAdmin,
 };
