@@ -41,7 +41,29 @@ const getSingleAdmin = async (req: Request, res: Response) => {
     });
   }
 };
+const updateAdmin = async (req: Request, res: Response) => {
+  try {
+    const result = await adminServices.updateAdmin(
+      req.params.adminId,
+      req.body
+    );
+    res.status(200).json({
+      success: true,
+      statusCode: 201,
+      message: "update admin successfully",
+
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went Wrong",
+      error: error,
+    });
+  }
+};
 export const adminController = {
   getAllAdmin,
   getSingleAdmin,
+  updateAdmin,
 };
