@@ -1,9 +1,14 @@
 import { Admin, Prisma, UserStatus } from "@prisma/client";
 import calculatePagination from "../../../helpers/paginationHelpers";
 import prisma from "../../../shared/prisma";
+import { IPaginationOptions } from "../../interfaces/pagination";
 import { adminSearchAbleFields } from "./admin.constant";
+import { TAdminFilterRequest } from "./admin.interface";
 
-const getAllAdmin = async (params: any, options: any) => {
+const getAllAdmin = async (
+  params: TAdminFilterRequest,
+  options: IPaginationOptions
+) => {
   const { limit, page, skip, sortBy, sortOrder } = calculatePagination(options);
   const { searchTerm, ...filterData } = params;
   const andConditions: Prisma.AdminWhereInput[] = [];
@@ -21,7 +26,7 @@ const getAllAdmin = async (params: any, options: any) => {
     andConditions.push({
       AND: Object.keys(filterData).map((key) => ({
         [key]: {
-          equals: filterData[key],
+          equals: (filterData as any)[key],
         },
       })),
     });
@@ -37,7 +42,7 @@ const getAllAdmin = async (params: any, options: any) => {
     orderBy:
       options.sortBy && options.sortOrder
         ? {
-            [options.options.sortBy]: options.sortOrder,
+            [options.sortBy]: options.sortOrder,
           }
         : {
             createdAt: "desc",
@@ -65,7 +70,10 @@ const getSingleAdmin = async (id: string): Promise<Admin | null> => {
   });
   return result;
 };
-const updateAdmin = async (id: string, payload: Partial<Admin>): Promise<Admin | null> => {
+const updateAdmin = async (
+  id: string,
+  payload: Partial<Admin>
+): Promise<Admin | null> => {
   await prisma.admin.findUniqueOrThrow({
     where: {
       id,
