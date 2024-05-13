@@ -1,7 +1,9 @@
 import { UserStatus } from "@prisma/client";
 import bcrypt from "bcrypt";
+import config from "../../../config";
 import { jwtHelpers } from "../../../shared/jwtHelpers";
 import prisma from "../../../shared/prisma";
+
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
@@ -23,16 +25,16 @@ const loginUser = async (payload: { email: string; password: string }) => {
       email: userData.email,
       role: userData.role,
     },
-    "skssnwdownwenqiofnieqoeoifneqiof3ib390389few98n3fn983f1930903sk023j0de2n0fd943nf930n9f3f94f3",
-    "5m"
+    config.jwt.jwt_access_serect as string,
+    config.jwt.jwt_access_serect_exipres_in as string
   );
   const refreshToken = jwtHelpers.generateToken(
     {
       email: userData.email,
       role: userData.role,
     },
-    "skssnwdownwd3joo1iibof1bfienqiofnieqoedrrr22edoifneqiof3ib390389few98n3fn983f1930903sk023j0de2n0ddo1oi1fd943nf930n9f3f94f3snodn3io1o",
-    "30d"
+    config.jwt.jwt_refresh_serect as string,
+    config.jwt.jwt_refresh_serect_exipres_in as string
   );
   return {
     accessToken,
@@ -46,7 +48,7 @@ const refreshToken = async (token: string) => {
   try {
     decodedToken = jwtHelpers.verifyToken(
       token,
-      "skssnwdownwd3joo1iibof1bfienqiofnieqoedrrr22edoifneqiof3ib390389few98n3fn983f1930903sk023j0de2n0ddo1oi1fd943nf930n9f3f94f3snodn3io1o"
+      config.jwt.jwt_refresh_serect as string
     );
   } catch (error) {
     throw new Error("You are not Authorized");
@@ -62,8 +64,8 @@ const refreshToken = async (token: string) => {
       email: userData.email,
       role: userData.role,
     },
-    "skssnwdownwenqiofnieqoeoifneqiof3ib390389few98n3fn983f1930903sk023j0de2n0fd943nf930n9f3f94f3",
-    "5m"
+    config.jwt.jwt_access_serect as string,
+    config.jwt.jwt_access_serect_exipres_in as string
   );
   return {
     accessToken,
