@@ -5,6 +5,7 @@ import config from "../../../config";
 import { jwtHelpers } from "../../../shared/jwtHelpers";
 import prisma from "../../../shared/prisma";
 import AppError from "../../errors/appError";
+import emailSender from "./emailSender";
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
@@ -76,7 +77,7 @@ const refreshToken = async (token: string) => {
 };
 
 const changePassword = async (
-  user,
+  user: any,
   payload: {
     oldPassword: string;
     newPassword: string;
@@ -92,7 +93,6 @@ const changePassword = async (
     payload.oldPassword,
     userData.password
   );
-  console.log(isCorrectPassword);
   if (!isCorrectPassword) {
     throw new AppError(httpStatus.BAD_REQUEST, "Incorrect Password");
   }
@@ -108,8 +108,80 @@ const changePassword = async (
   });
   return updateUser;
 };
+
+const forgotPassword = async (payload: { email: string }) => {
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: payload.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+  const resetPasswordToken = jwtHelpers.generateToken(
+    {
+      email: userData.email,
+      role: userData.role,
+    },
+    config.reset_password_serect as string,
+    config.reset_password_serect_expires_in as string
+  );
+  const resetPasswordLink =
+    config.reset_password_link +
+    `?userId=${userData.id}&token=${resetPasswordToken}`;
+
+  await emailSender(
+    userData.email,
+    `
+      <div>
+      <p>Dear user</p>
+      <p>Your reset password link:</p>
+      <a href=${resetPasswordLink}>
+      <button>Click here to Reset Password</button>
+      </a>
+      </div>
+        `
+  );
+};
+
+const resetPassword = async (
+  token: string,
+  payload: {
+    id: string;
+    password: string;
+  }
+) => {
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: payload.id,
+    },
+  });
+
+  const isValidToken = jwtHelpers.verifyToken(
+    token,
+    config.reset_password_serect as string
+  );
+  if (!isValidToken) {
+    throw new AppError(httpStatus.FORBIDDEN, "Invalid credentials");
+  }
+  // hashed password
+  const hashedPassword: string = await bcrypt.hash(payload.password, 10);
+  await prisma.user.update({
+    where: {
+      email: userData.email,
+    },
+    data: {
+      password: hashedPassword,
+      needPasswordChange: false,
+    },
+  });
+  return {
+    message: "Password change successfully",
+  };
+};
+
 export const authServices = {
   loginUser,
   refreshToken,
   changePassword,
+  forgotPassword,
+  resetPassword,
 };

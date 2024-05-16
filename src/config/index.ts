@@ -12,4 +12,12 @@ export default {
     jwt_refresh_serect: process.env.JWT_REFRESH_SERECT,
     jwt_refresh_serect_exipres_in: process.env.JWT_REFRESH_SERECT_EXIPRES_IN,
   },
+  reset_password_serect: process.env.RESET_PASSWORD_SERECT,
+  reset_password_serect_expires_in:
+    process.env.RESET_PASSWORD_SERECT_EXPIRES_IN,
+  reset_password_link: process.env.RESET_PASSWORD_LINK,
+  email_sender: {
+    email: process.env.EMAIL,
+    password: process.env.APP_PASSWORD,
+  },
 };

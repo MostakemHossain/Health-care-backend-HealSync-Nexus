@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import httpStatus from "http-status";
 import catchAsync from "../../../shared/catchAsync";
 import { sendResopnse } from "../../../shared/sendResponse";
@@ -32,14 +33,35 @@ const refreshToken = catchAsync(async (req, res) => {
     data: result,
   });
 });
-const changePassword = catchAsync(async (req, res) => {
-  const user= req.user
-  const result = await authServices.changePassword(user,req.body);
+const changePassword = catchAsync(
+  async (req: Request & { user?: any }, res: Response) => {
+    const user = req.user;
+    const result = await authServices.changePassword(user, req.body);
+    sendResopnse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Password change Successfully",
+      data: result,
+    });
+  }
+);
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  const result = await authServices.forgotPassword(req.body);
   sendResopnse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Password change Successfully",
-    data: result,
+    message: "Check Your email",
+    data: null,
+  });
+});
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  const token = req.headers.authorization || "";
+  const result = await authServices.resetPassword(token,req.body);
+  sendResopnse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password reset successfully",
+    data: null,
   });
 });
 
@@ -47,4 +69,6 @@ export const authController = {
   loginUser,
   refreshToken,
   changePassword,
+  forgotPassword,
+  resetPassword,
 };
