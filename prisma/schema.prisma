@@ -47,7 +47,7 @@ model Doctor {
   id                  String   @id @default(uuid())
   name                String
   email               String   @unique
-  user                User     @relation(fields: [email], references: [id])
+  user                User     @relation(fields: [email], references: [email])
   profilePhoto        String?
   contactNumber       String
   address             String
